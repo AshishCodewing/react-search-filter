@@ -1,33 +1,92 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react"
+import Navigation from "./Navigation/Navigation"
+import Products from "./Products/Products"
+import Recommended from "./Recommended/Recommended"
+import Sidebar from "./Sidebar/Sidebar"
 
+import products from './data'
+import Card from "./Components/Card"
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedCategory, setSelectedCategory] = useState(null)
+  const [query, setQuery] = useState('');
+
+  // Input Filter
+  const handleInputChange = event => {
+    setQuery(event.target.value)
+    console.log(event.target.value);
+  }
+
+  const filteredItems = products.filter(product => {
+    return (
+
+      product.title.toLocaleLowerCase().indexOf(query.toLocaleLowerCase()) !== -1
+    )
+  })
+
+  // Radio Filter
+  const handleChange = event => {
+    setSelectedCategory(event.target.value)
+    console.log(event.target.value);
+  }
+
+  // Button Filter
+  const handleClick = event => {
+    setSelectedCategory(event.target.value)
+    console.log(event.target.value);
+
+  }
+
+  function filteredData(products, selected, query) {
+    let filteredProducts = products
+
+    //Filtering input items
+    if (query) {
+      filteredProducts = filteredItems
+    }
+
+    //Selected Filter
+    if (selected) {
+      filteredProducts = filteredProducts.filter(({ category, color, company, newPrice, title }) => {
+        return (
+          category === selected || color === selected || company === selected || newPrice === selected || title === selected
+        )
+      })
+    }
+    console.log(filteredProducts, 'filteredProducts');
+
+    return filteredProducts.map(({ img, title, reviews, prevPrice, newPrice }) => {
+      return (
+        <Card
+          key={Math.random()}
+          img={img}
+          reviews={reviews}
+          title={title}
+          prevPrice={prevPrice}
+          newPrice={newPrice}
+        />
+      )
+
+    })
+
+  }
+
+  const result = filteredData(products, selectedCategory, query)
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Sidebar
+        handleChange={handleChange}
+      />
+      <Navigation
+        query={query}
+        handleInputChange={handleInputChange}
+      />
+      <Recommended
+        handleClick={handleClick}
+      />
+      <Products
+        result={result}
+      />
     </>
   )
 }
